@@ -78,7 +78,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
-                        <Private-Package>org.wso2.carbon.identity.authenticator.internal</Private-Package>
+                        <Private-Package>org.wso2.carbon.identity.authenticator.twitter.internal</Private-Package>
                         <Import-Package>twitter4j.*,org.twitter4j.*; version="[4.0,)",
                             org.apache.axis2.*,
                             javax.xml.soap,
@@ -92,7 +92,7 @@
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>
-                            !org.wso2.carbon.identity.authenticator.internal,
+                            !org.wso2.carbon.identity.authenticator.twitter.internal,
                             org.wso2.carbon.identity.authenticator.*,
                             twitter4j.*
                         </Export-Package>
