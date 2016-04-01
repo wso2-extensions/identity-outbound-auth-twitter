@@ -30,15 +30,10 @@
     <name>WSO2 Carbon - Authenticator Library For Twitter</name>
     <url>http://wso2.org</url>
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>org.twitter4j</groupId>-->
-            <!--<artifactId>twitter4j-core</artifactId>-->
-            <!--<version>4.0.5-SNAPSHOT</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
-            <version>[4.0,)</version>
+            <version>${twitter4j.version}</version>
         </dependency>
     </dependencies>
     <repositories>
@@ -120,4 +115,7 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <twitter4j.version>[4.0,)</twitter4j.version>
+    </properties>
 </project>

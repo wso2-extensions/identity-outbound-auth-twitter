@@ -85,9 +85,8 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
                     context.getCallerSessionKey(), context.getContextIdentifier());
             String callbackURL = authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
             RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL.toString());
-            String subStr =
-                    queryParams.substring(queryParams.indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY
-                            + "="));
+            String subStr = queryParams.substring(queryParams
+                    .indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY + "="));
             String sessionDK = subStr.substring(subStr.indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY
                     + "="), subStr.indexOf("&")).replace((TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY + "=")
                     , "");
