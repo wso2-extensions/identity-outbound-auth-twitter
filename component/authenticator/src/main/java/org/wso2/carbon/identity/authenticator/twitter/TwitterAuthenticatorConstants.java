@@ -31,6 +31,4 @@ public class TwitterAuthenticatorConstants {
     public static final String TWITTER_OAUTH_TOKEN = "oauth_token";
     public static final String TWITTER_OAUTH_VERIFIER = "oauth_verifier";
     public static final String TWITTER_CLAIM_NAME = "name";
-    public static final String TWITTER_CLAIM_SCREEN_NAME = "screen_name";
-    public static final String TWITTER_CLAIM_URL = "url";
 }

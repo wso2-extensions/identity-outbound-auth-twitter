@@ -83,8 +83,7 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         try {
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(context.getQueryParams(),
                     context.getCallerSessionKey(), context.getContextIdentifier());
-            String callbackURL = authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL) + "?"
-                    + queryParams;
+            String callbackURL = authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
             RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL.toString());
             String subStr =
                     queryParams.substring(queryParams.indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY
@@ -121,7 +120,9 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
             AccessToken token = twitter.getOAuthAccessToken(requestToken, verifier);
             request.getSession().removeAttribute(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN);
             User user = twitter.verifyCredentials();
-            buildClaims(user, context);
+            if (token != null) {
+                buildClaims(user, context);
+            }
         } catch (TwitterException e) {
             log.error("Exception while obtaining OAuth token form Twitter", e);
             throw new AuthenticationFailedException("Exception while obtaining OAuth token form Twitter", e);
