@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.identity.authenticator.twitter;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
@@ -83,7 +84,7 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         try {
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(context.getQueryParams(),
                     context.getCallerSessionKey(), context.getContextIdentifier());
-            String callbackURL = authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
+            String callbackURL = getCallbackUrl(authenticatorProperties);
             RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL.toString());
             String subStr = queryParams.substring(queryParams
                     .indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY + "="));
@@ -156,6 +157,17 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
     }
 
     /**
+     * Get the CallBackURL
+     */
+    @Override
+    protected String getCallbackUrl(Map<String, String> authenticatorProperties) {
+        if (StringUtils.isNotEmpty((String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL))) {
+            return (String)authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
+        }
+        return TwitterAuthenticatorConstants.TWITTER_CALLBACK_URL;
+    }
+
+    /**
      * Get Configuration Properties
      */
     @Override
@@ -174,6 +186,7 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         apiSecret.setName(TwitterAuthenticatorConstants.TWITTER_API_SECRET);
         apiSecret.setDisplayName("API Secret");
         apiSecret.setRequired(true);
+        apiSecret.setConfidential(true);
         apiSecret.setDescription("Enter the API Secret");
         apiSecret.setDisplayOrder(1);
         configProperties.add(apiSecret);
