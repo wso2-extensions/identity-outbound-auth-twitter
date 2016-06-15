@@ -20,8 +20,8 @@
 package org.wso2.carbon.identity.authenticator.twitter;
 
 public class TwitterAuthenticatorConstants {
-    public static final String AUTHENTICATOR_NAME = "TwitterAuthenticator";
-    public static final String AUTHENTICATOR_FRIENDLY_NAME = "Twitter";
+    public static final String AUTHENTICATOR_NAME = "Twitter";
+    public static final String AUTHENTICATOR_FRIENDLY_NAME = "TwitterAuthenticator";
 
     public static final String TWITTER_API_KEY = "APIKey";
     public static final String TWITTER_API_SECRET = "APISecret";
@@ -32,4 +32,6 @@ public class TwitterAuthenticatorConstants {
     public static final String TWITTER_OAUTH_VERIFIER = "oauth_verifier";
     public static final String TWITTER_CLAIM_NAME = "name";
     public static final String TWITTER_CALLBACK_URL = "https://localhost:9443/commonauth";
+    public static final String TWITTER_CLAIM_EMAIL ="email" ;
+
 }
