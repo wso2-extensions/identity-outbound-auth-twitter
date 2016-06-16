@@ -20,8 +20,8 @@
 package org.wso2.carbon.identity.authenticator.twitter;
 
 public class TwitterAuthenticatorConstants {
-    public static final String AUTHENTICATOR_NAME = "Twitter";
-    public static final String AUTHENTICATOR_FRIENDLY_NAME = "TwitterAuthenticator";
+    public static final String AUTHENTICATOR_NAME = "TwitterAuthenticator";
+    public static final String AUTHENTICATOR_FRIENDLY_NAME = "Twitter";
 
     public static final String TWITTER_API_KEY = "APIKey";
     public static final String TWITTER_API_SECRET = "APISecret";
