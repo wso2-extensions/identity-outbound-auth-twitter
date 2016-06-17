@@ -20,17 +20,24 @@
 package org.wso2.carbon.identity.authenticator.twitter;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.application.authentication.framework.FederatedApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.authenticator.oidc.OpenIDConnectAuthenticator;
-import org.wso2.carbon.identity.application.authentication.framework.FederatedApplicationAuthenticator;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.application.common.model.Property;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.User;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,14 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.User;
-import twitter4j.auth.AccessToken;
-import twitter4j.auth.RequestToken;
-import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Authenticator of Twitter
@@ -114,7 +113,7 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
     protected void processAuthenticationResponse(HttpServletRequest request, HttpServletResponse response,
                                                  AuthenticationContext context) throws AuthenticationFailedException {
         Twitter twitter = (Twitter) request.getSession().getAttribute(TwitterAuthenticatorConstants.AUTHENTICATOR_NAME
-                        .toLowerCase());
+                .toLowerCase());
         RequestToken requestToken =
                 (RequestToken) request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN);
         String verifier = request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER);
@@ -140,9 +139,9 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME,
                 TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME, (String) null, false), user.getName());
         claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,
-                TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,(String) null, false),user.getEmail());
+                TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL, (String) null, false), user.getEmail());
         claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION,
-                TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION,(String) null, false),user.getLocation());
+                TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION, (String) null, false), user.getLocation());
         authenticatedUserObj.setUserAttributes(claims);
         context.setSubject(authenticatedUserObj);
     }
@@ -169,7 +168,7 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
     @Override
     protected String getCallbackUrl(Map<String, String> authenticatorProperties) {
         if (StringUtils.isNotEmpty((String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL))) {
-            return (String)authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
+            return (String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
         }
         return TwitterAuthenticatorConstants.TWITTER_CALLBACK_URL;
     }
