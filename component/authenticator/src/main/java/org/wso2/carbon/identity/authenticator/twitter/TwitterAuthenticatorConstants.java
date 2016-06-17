@@ -32,4 +32,6 @@ public class TwitterAuthenticatorConstants {
     public static final String TWITTER_OAUTH_VERIFIER = "oauth_verifier";
     public static final String TWITTER_CLAIM_NAME = "name";
     public static final String TWITTER_CALLBACK_URL = "https://localhost:9443/commonauth";
+    public static final String TWITTER_CLAIM_EMAIL ="email" ;
+
 }

@@ -46,6 +46,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Authenticator of Twitter
@@ -76,10 +77,12 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
     protected void initiateAuthenticationRequest(HttpServletRequest request,
                                                  HttpServletResponse response, AuthenticationContext context)
             throws AuthenticationFailedException {
+        ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         Map<String, String> authenticatorProperties = context.getAuthenticatorProperties();
         String apiKey = authenticatorProperties.get(TwitterAuthenticatorConstants.TWITTER_API_KEY);
         String apiSecret = authenticatorProperties.get(TwitterAuthenticatorConstants.TWITTER_API_SECRET);
-        Twitter twitter = new TwitterFactory().getInstance();
+        configurationBuilder.setIncludeEmailEnabled(true);
+        Twitter twitter = new TwitterFactory(configurationBuilder.build()).getInstance();
         twitter.setOAuthConsumer(apiKey, apiSecret);
         try {
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(context.getQueryParams(),
@@ -136,6 +139,8 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         Map<ClaimMapping, String> claims = new HashMap<ClaimMapping, String>();
         claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME,
                 TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME, (String) null, false), user.getName());
+        claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,
+                TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,(String) null, false),user.getEmail());
         authenticatedUserObj.setUserAttributes(claims);
         context.setSubject(authenticatedUserObj);
     }
