@@ -141,6 +141,8 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
                 TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME, (String) null, false), user.getName());
         claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,
                 TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,(String) null, false),user.getEmail());
+        claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION,
+                TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION,(String) null, false),user.getLocation());
         authenticatedUserObj.setUserAttributes(claims);
         context.setSubject(authenticatedUserObj);
     }
