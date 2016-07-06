@@ -145,9 +145,9 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
                 try {
                     buildClaims(context, json);
                 } catch (JSONException e) {
-                    log.debug("Error while parsing the json");
+                    log.error("Error while parsing the json");
                 } catch (ApplicationAuthenticatorException e) {
-                    log.debug("Error while building the claim");
+                    log.error("Error while building the claim");
                 }
             }
         } catch (TwitterException e) {
@@ -162,7 +162,6 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         userClaims = JSONUtils.parseJSON(jsonObject);
         if (userClaims != null) {
             Map<ClaimMapping, String> claims = new HashMap<ClaimMapping, String>();
-
             for (Map.Entry<String, Object> entry : userClaims.entrySet()) {
                 claims.put(ClaimMapping.build(entry.getKey(), entry.getKey(), null,
                         false), entry.getValue().toString());
@@ -171,7 +170,6 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
                     log.debug("Adding claim mapping : " + entry.getKey() + " <> " + entry.getKey() + " : "
                             + entry.getValue());
                 }
-
             }
             if (StringUtils.isBlank(context.getExternalIdP().getIdentityProvider().getClaimConfig().getUserClaimURI())) {
                 context.getExternalIdP().getIdentityProvider().getClaimConfig().setUserClaimURI
@@ -208,7 +206,7 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
 
     @Override
     public String getFriendlyName() {
-        return TwitterAuthenticatorConstants.TWITTER_FRIENDLY_NAME;
+        return TwitterAuthenticatorConstants.AUTHENTICATOR_FRIENDLY_NAME;
     }
 
     @Override
