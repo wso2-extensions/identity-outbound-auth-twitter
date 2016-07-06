@@ -22,22 +22,29 @@ package org.wso2.carbon.identity.authenticator.twitter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.oltu.oauth2.common.utils.JSONUtils;
+import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.FederatedApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.exception.ApplicationAuthenticatorException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
-import org.wso2.carbon.identity.application.authenticator.oidc.OpenIDConnectAuthenticator;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
+import org.wso2.carbon.identity.base.IdentityConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+
+import twitter4j.JSONException;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.User;
-import twitter4j.auth.AccessToken;
-import twitter4j.auth.RequestToken;
-import twitter4j.conf.ConfigurationBuilder;
+import twitter4j.TwitterObjectFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,17 +54,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Authenticator of Twitter
- */
-public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements FederatedApplicationAuthenticator {
+public class TwitterAuthenticator extends AbstractApplicationAuthenticator implements
+        FederatedApplicationAuthenticator {
 
-    private static Log log = LogFactory.getLog(TwitterAuthenticator.class);
-
-    public boolean canHandle(HttpServletRequest request) {
-        return (request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_TOKEN) != null
-                && request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER) != null);
-    }
+    private static final long serialVersionUID = -4844100162196896194L;
+    private static final Log log = LogFactory.getLog(TwitterAuthenticator.class);
 
     public String getContextIdentifier(HttpServletRequest request) {
         if (request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_CONTEXT_IDENTIFIER) == null) {
@@ -67,6 +68,11 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         } else {
             return (String) request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_CONTEXT_IDENTIFIER);
         }
+    }
+
+    public boolean canHandle(HttpServletRequest request) {
+        return (request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_TOKEN) != null
+                && request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER) != null);
     }
 
     /**
@@ -80,14 +86,16 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         Map<String, String> authenticatorProperties = context.getAuthenticatorProperties();
         String apiKey = authenticatorProperties.get(TwitterAuthenticatorConstants.TWITTER_API_KEY);
         String apiSecret = authenticatorProperties.get(TwitterAuthenticatorConstants.TWITTER_API_SECRET);
-        configurationBuilder.setIncludeEmailEnabled(true);
+        configurationBuilder.setDebugEnabled(true)
+                .setIncludeEmailEnabled(true)
+                .setJSONStoreEnabled(true);
         Twitter twitter = new TwitterFactory(configurationBuilder.build()).getInstance();
         twitter.setOAuthConsumer(apiKey, apiSecret);
         try {
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(context.getQueryParams(),
                     context.getCallerSessionKey(), context.getContextIdentifier());
             String callbackURL = getCallbackUrl(authenticatorProperties);
-            RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL.toString());
+            RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL);
             String subStr = queryParams.substring(queryParams
                     .indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY + "="));
             String sessionDK = subStr.substring(subStr.indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY
@@ -107,6 +115,17 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
     }
 
     /**
+     * Get the CallBackURL
+     */
+    protected String getCallbackUrl(Map<String, String> authenticatorProperties) {
+        if (StringUtils.isNotEmpty((String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL))) {
+            return (String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
+        }
+        return TwitterAuthenticatorConstants.TWITTER_CALLBACK_URL;
+    }
+
+
+    /**
      * Process the response of the Twitter
      */
     @Override
@@ -121,8 +140,15 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
             AccessToken token = twitter.getOAuthAccessToken(requestToken, verifier);
             request.getSession().removeAttribute(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN);
             User user = twitter.verifyCredentials();
+            String json = TwitterObjectFactory.getRawJSON(user);
             if (token != null) {
-                buildClaims(user, context);
+                try {
+                    buildClaims(context, json);
+                } catch (JSONException e) {
+                    log.debug("Error while parsing the json");
+                } catch (ApplicationAuthenticatorException e) {
+                    log.debug("Error while building the claim");
+                }
             }
         } catch (TwitterException e) {
             log.error("Exception while obtaining OAuth token form Twitter", e);
@@ -130,47 +156,64 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         }
     }
 
-    public void buildClaims(User user, AuthenticationContext context) {
-        AuthenticatedUser authenticatedUserObj;
-        authenticatedUserObj = AuthenticatedUser.createFederateAuthenticatedUserFromSubjectIdentifier(user.getId() + "");
-        authenticatedUserObj.setAuthenticatedSubjectIdentifier(user.getId() + "");
+    public void buildClaims(AuthenticationContext context, String jsonObject)
+            throws ApplicationAuthenticatorException, JSONException {
+        Map<String, Object> userClaims;
+        userClaims = JSONUtils.parseJSON(jsonObject);
+        if (userClaims != null) {
+            Map<ClaimMapping, String> claims = new HashMap<ClaimMapping, String>();
 
-        Map<ClaimMapping, String> claims = new HashMap<ClaimMapping, String>();
-        claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME,
-                TwitterAuthenticatorConstants.TWITTER_CLAIM_NAME, (String) null, false), user.getName());
-        claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL,
-                TwitterAuthenticatorConstants.TWITTER_CLAIM_EMAIL, (String) null, false), user.getEmail());
-        claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION,
-                TwitterAuthenticatorConstants.TWITTER_CLAIM_LOCATION, (String) null, false), user.getLocation());
-        authenticatedUserObj.setUserAttributes(claims);
-        context.setSubject(authenticatedUserObj);
+            for (Map.Entry<String, Object> entry : userClaims.entrySet()) {
+                claims.put(ClaimMapping.build(entry.getKey(), entry.getKey(), null,
+                        false), entry.getValue().toString());
+                if (log.isDebugEnabled() &&
+                        IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.USER_CLAIMS)) {
+                    log.debug("Adding claim mapping : " + entry.getKey() + " <> " + entry.getKey() + " : "
+                            + entry.getValue());
+                }
+
+            }
+            if (StringUtils.isBlank(context.getExternalIdP().getIdentityProvider().getClaimConfig().getUserClaimURI())) {
+                context.getExternalIdP().getIdentityProvider().getClaimConfig().setUserClaimURI
+                        (TwitterAuthenticatorConstants.CLAIM_ID);
+            }
+            String subjectFromClaims = FrameworkUtils.getFederatedSubjectFromClaims(
+                    context.getExternalIdP().getIdentityProvider(), claims);
+            if (subjectFromClaims != null && !subjectFromClaims.isEmpty()) {
+                AuthenticatedUser authenticatedUser =
+                        AuthenticatedUser.createFederateAuthenticatedUserFromSubjectIdentifier(subjectFromClaims);
+                context.setSubject(authenticatedUser);
+            } else {
+                setSubject(context, userClaims);
+            }
+            context.getSubject().setUserAttributes(claims);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Decoded json object is null");
+            }
+            throw new ApplicationAuthenticatorException("Decoded json object is null");
+        }
     }
 
-    /**
-     * Get the friendly name of the Authenticator
-     */
+    private void setSubject(AuthenticationContext context, Map<String, Object> jsonObject)
+            throws ApplicationAuthenticatorException {
+        String authenticatedUserId = (String) jsonObject.get(TwitterAuthenticatorConstants.DEFAULT_USER_IDENTIFIER);
+        if (StringUtils.isEmpty(authenticatedUserId)) {
+            throw new ApplicationAuthenticatorException("Authenticated user identifier is empty");
+        }
+        AuthenticatedUser authenticatedUser =
+                AuthenticatedUser.createFederateAuthenticatedUserFromSubjectIdentifier(authenticatedUserId);
+        context.setSubject(authenticatedUser);
+    }
+
     @Override
     public String getFriendlyName() {
-        return TwitterAuthenticatorConstants.AUTHENTICATOR_FRIENDLY_NAME;
+        return TwitterAuthenticatorConstants.TWITTER_FRIENDLY_NAME;
     }
 
-    /**
-     * Get the name of the Authenticator
-     */
     @Override
     public String getName() {
         return TwitterAuthenticatorConstants.AUTHENTICATOR_NAME;
-    }
-
-    /**
-     * Get the CallBackURL
-     */
-    @Override
-    protected String getCallbackUrl(Map<String, String> authenticatorProperties) {
-        if (StringUtils.isNotEmpty((String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL))) {
-            return (String) authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
-        }
-        return TwitterAuthenticatorConstants.TWITTER_CALLBACK_URL;
     }
 
     /**
@@ -206,4 +249,3 @@ public class TwitterAuthenticator extends OpenIDConnectAuthenticator implements 
         return configProperties;
     }
 }
-
