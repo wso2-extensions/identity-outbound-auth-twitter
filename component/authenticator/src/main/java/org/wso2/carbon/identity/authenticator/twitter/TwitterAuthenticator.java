@@ -195,7 +195,11 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
 
     private void setSubject(AuthenticationContext context, Map<String, Object> jsonObject)
             throws ApplicationAuthenticatorException {
-        String authenticatedUserId = (String) jsonObject.get(TwitterAuthenticatorConstants.DEFAULT_USER_IDENTIFIER);
+        String authenticatedUserId = String.valueOf(jsonObject.get(TwitterAuthenticatorConstants.DEFAULT_USER_IDENTIFIER));
+        if (log.isDebugEnabled()) {
+            log.debug("The subject claim that you have selected is null. The default subject claim " +
+                    authenticatedUserId + " has been set");
+        }
         if (StringUtils.isEmpty(authenticatedUserId)) {
             throw new ApplicationAuthenticatorException("Authenticated user identifier is empty");
         }

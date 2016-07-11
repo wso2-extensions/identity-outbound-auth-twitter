@@ -14,7 +14,7 @@ Do the following:
 
 Deploying and Configuring Twitter artifacts:
 
-1.  Build the <TWITTER_AUTHENTICATOR_HOME>/component/authenticator & copy the org.wso2.carbon.extension.identity.authenticator.twitter.connector-1.0.0.jar
+1.  Build the <TWITTER_AUTHENTICATOR_HOME>/component/authenticator & copy the org.wso2.carbon.extension.identity.authenticator.twitter.connector-1.0.5.jar
     to <IS-HOME>/repository/components/dropins
 
 2.  Follow the steps in https://docs.wso2.com/display/ISCONNECTORS/Configuring+Twitter+Authenticator
