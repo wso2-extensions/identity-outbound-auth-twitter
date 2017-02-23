@@ -59,15 +59,11 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
 
     private static final long serialVersionUID = -4844100162196896194L;
     private static final Log log = LogFactory.getLog(TwitterAuthenticator.class);
+    private String sessionDataKey;
 
+    @Override
     public String getContextIdentifier(HttpServletRequest request) {
-        if (request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_CONTEXT_IDENTIFIER) == null) {
-            request.getSession().setAttribute(TwitterAuthenticatorConstants.TWITTER_CONTEXT_IDENTIFIER,
-                    request.getParameter(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY));
-            return (String) request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY);
-        } else {
-            return (String) request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_CONTEXT_IDENTIFIER);
-        }
+        return sessionDataKey;
     }
 
     public boolean canHandle(HttpServletRequest request) {
@@ -92,6 +88,7 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         Twitter twitter = new TwitterFactory(configurationBuilder.build()).getInstance();
         twitter.setOAuthConsumer(apiKey, apiSecret);
         try {
+            sessionDataKey = context.getContextIdentifier();
             String queryParams = FrameworkUtils.getQueryStringWithFrameworkContextId(context.getQueryParams(),
                     context.getCallerSessionKey(), context.getContextIdentifier());
             String callbackURL = getCallbackUrl(authenticatorProperties);
@@ -101,9 +98,9 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
             String sessionDK = subStr.substring(subStr.indexOf(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY
                     + "="), subStr.indexOf("&")).replace((TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY + "=")
                     , "");
-            request.getSession().setAttribute(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY, sessionDK);
-            request.getSession().setAttribute(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN, requestToken);
-            request.getSession().setAttribute(TwitterAuthenticatorConstants.AUTHENTICATOR_NAME.toLowerCase(), twitter);
+            context.setProperty(TwitterAuthenticatorConstants.TWITTER_SESSION_DATA_KEY, sessionDK);
+            context.setProperty(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN, requestToken);
+            context.setProperty(TwitterAuthenticatorConstants.AUTHENTICATOR_NAME.toLowerCase(), twitter);
             response.sendRedirect(requestToken.getAuthenticationURL());
         } catch (TwitterException e) {
             log.error("Exception while sending to the Twitter login page.", e);
@@ -131,10 +128,8 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
     @Override
     protected void processAuthenticationResponse(HttpServletRequest request, HttpServletResponse response,
                                                  AuthenticationContext context) throws AuthenticationFailedException {
-        Twitter twitter = (Twitter) request.getSession().getAttribute(TwitterAuthenticatorConstants.AUTHENTICATOR_NAME
-                .toLowerCase());
-        RequestToken requestToken =
-                (RequestToken) request.getSession().getAttribute(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN);
+        Twitter twitter = (Twitter) context.getProperty(TwitterAuthenticatorConstants.AUTHENTICATOR_NAME.toLowerCase());
+        RequestToken requestToken = (RequestToken) context.getProperties().get(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN);
         String verifier = request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER);
         try {
             AccessToken token = twitter.getOAuthAccessToken(requestToken, verifier);
