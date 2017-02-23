@@ -17,8 +17,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.wso2.carbon.extension.identity.authenticator</groupId>
-        <artifactId>org.wso2.carbon.extension.identity.authenticator.twitter</artifactId>
+        <groupId>org.wso2.carbon.extension.identity.authenticator.outbound.twitter</groupId>
+        <artifactId>identity-outbound-auth-twitter</artifactId>
         <version>1.0.6-SNAPSHOT</version>
     </parent>
     <artifactId>org.wso2.carbon.extension.identity.authenticator.twitter.feature</artifactId>
@@ -28,7 +28,7 @@
     <description>This feature contains extension feature for Twitter</description>
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.extension.identity.authenticator</groupId>
+            <groupId>org.wso2.carbon.extension.identity.authenticator.outbound.twitter</groupId>
             <artifactId>org.wso2.carbon.extension.identity.authenticator.twitter.connector</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -57,7 +57,7 @@
                             </adviceFile>
                             <bundles>
                                 <bundleDef>
-                                    org.wso2.carbon.extension.identity.authenticator:org.wso2.carbon.extension.identity.authenticator.twitter.connector
+                                    org.wso2.carbon.extension.identity.authenticator.outbound.twitter:org.wso2.carbon.extension.identity.authenticator.twitter.connector
                                 </bundleDef>
                             </bundles>
                         </configuration>

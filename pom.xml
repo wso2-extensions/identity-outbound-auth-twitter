@@ -23,8 +23,8 @@
         <artifactId>wso2</artifactId>
         <version>1</version>
     </parent>
-    <groupId>org.wso2.carbon.extension.identity.authenticator</groupId>
-    <artifactId>org.wso2.carbon.extension.identity.authenticator.twitter</artifactId>
+    <groupId>org.wso2.carbon.extension.identity.authenticator.outbound.twitter</groupId>
+    <artifactId>identity-outbound-auth-twitter</artifactId>
     <version>1.0.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon Extension - Twitter Pom</name>
