@@ -121,6 +121,10 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         return TwitterAuthenticatorConstants.TWITTER_CALLBACK_URL;
     }
 
+    @Override
+    public String getClaimDialectURI() {
+        return TwitterAuthenticatorConstants.CLAIM_DIALECT_URI;
+    }
 
     /**
      * Process the response of the Twitter
@@ -151,15 +155,17 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         }
     }
 
-    public void buildClaims(AuthenticationContext context, String jsonObject)
+    private void buildClaims(AuthenticationContext context, String jsonObject)
             throws ApplicationAuthenticatorException, JSONException {
         Map<String, Object> userClaims;
         userClaims = JSONUtils.parseJSON(jsonObject);
         if (userClaims != null) {
-            Map<ClaimMapping, String> claims = new HashMap<ClaimMapping, String>();
+            Map<ClaimMapping, String> claims = new HashMap<>();
             for (Map.Entry<String, Object> entry : userClaims.entrySet()) {
-                claims.put(ClaimMapping.build(entry.getKey(), entry.getKey(), null,
-                        false), entry.getValue().toString());
+                claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
+                                entry.getKey(), TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
+                                entry.getKey(), null, false),
+                        entry.getValue().toString());
                 if (log.isDebugEnabled() &&
                         IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.USER_CLAIMS)) {
                     log.debug("Adding claim mapping : " + entry.getKey() + " <> " + entry.getKey() + " : "
