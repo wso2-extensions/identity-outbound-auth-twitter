@@ -155,7 +155,7 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         }
     }
 
-    private void buildClaims(AuthenticationContext context, String jsonObject)
+    public void buildClaims(AuthenticationContext context, String jsonObject)
             throws ApplicationAuthenticatorException, JSONException {
         Map<String, Object> userClaims;
         userClaims = JSONUtils.parseJSON(jsonObject);
@@ -168,8 +168,10 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
                         entry.getValue().toString());
                 if (log.isDebugEnabled() &&
                         IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.USER_CLAIMS)) {
-                    log.debug("Adding claim mapping : " + entry.getKey() + " <> " + entry.getKey() + " : "
-                            + entry.getValue());
+                    log.debug("Adding claim mapping : " + TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
+                            entry.getKey() + " <> " + TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
+                            entry.getKey() + " : " +
+                            entry.getValue());
                 }
             }
             if (StringUtils.isBlank(context.getExternalIdP().getIdentityProvider().getClaimConfig().getUserClaimURI())) {
