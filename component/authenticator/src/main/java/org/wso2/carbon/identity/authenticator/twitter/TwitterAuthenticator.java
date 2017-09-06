@@ -123,7 +123,12 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
 
     @Override
     public String getClaimDialectURI() {
-        return TwitterAuthenticatorConstants.CLAIM_DIALECT_URI;
+        String claimDialectUri = super.getClaimDialectURI();
+        if (StringUtils.isNotEmpty(claimDialectUri)) {
+            return claimDialectUri;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -162,16 +167,18 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         if (userClaims != null) {
             Map<ClaimMapping, String> claims = new HashMap<>();
             for (Map.Entry<String, Object> entry : userClaims.entrySet()) {
-                claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                                entry.getKey(), TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                                entry.getKey(), null, false),
+                String claimDialectUri = getClaimDialectURI();
+                if (claimDialectUri == null) {
+                    claimDialectUri = "";
+                } else {
+                    claimDialectUri += "/";
+                }
+                String claimUri =  claimDialectUri + entry.getKey();
+                claims.put(ClaimMapping.build(claimUri, claimUri, null, false),
                         entry.getValue().toString());
                 if (log.isDebugEnabled() &&
                         IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.USER_CLAIMS)) {
-                    log.debug("Adding claim mapping : " + TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                            entry.getKey() + " <> " + TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                            entry.getKey() + " : " +
-                            entry.getValue());
+                    log.debug("Adding claim mapping : " + claimUri + " <> " + claimUri + " : " + entry.getValue());
                 }
             }
             if (StringUtils.isBlank(context.getExternalIdP().getIdentityProvider().getClaimConfig().getUserClaimURI())) {
