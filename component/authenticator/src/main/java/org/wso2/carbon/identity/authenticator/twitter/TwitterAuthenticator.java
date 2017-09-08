@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.utils.JSONUtils;
 import org.wso2.carbon.identity.application.authentication.framework.AbstractApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.FederatedApplicationAuthenticator;
+import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.ApplicationAuthenticatorException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
@@ -123,7 +125,28 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
 
     @Override
     public String getClaimDialectURI() {
-        return TwitterAuthenticatorConstants.CLAIM_DIALECT_URI;
+        String claimDialectUri = null;
+        AuthenticatorConfig authConfig = FileBasedConfigurationBuilder.getInstance().getAuthenticatorBean(getName());
+        if (authConfig != null) {
+            Map<String, String> parameters = authConfig.getParameterMap();
+            if (parameters != null && parameters.containsKey(TwitterAuthenticatorConstants.
+                    CLAIM_DIALECT_URI_PARAMETER)) {
+                claimDialectUri = parameters.get(TwitterAuthenticatorConstants.CLAIM_DIALECT_URI_PARAMETER);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Found no Parameter map for connector " + getName());
+                }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("FileBasedConfigBuilder returned null AuthenticatorConfigs for the connector " +
+                        getName());
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Authenticator " + getName() + " is using the claim dialect uri " + claimDialectUri);
+        }
+        return claimDialectUri;
     }
 
     /**
@@ -161,17 +184,19 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         userClaims = JSONUtils.parseJSON(jsonObject);
         if (userClaims != null) {
             Map<ClaimMapping, String> claims = new HashMap<>();
+            String claimDialectUri = getClaimDialectURI();
+            if (claimDialectUri == null) {
+                claimDialectUri = "";
+            } else {
+                claimDialectUri += "/";
+            }
             for (Map.Entry<String, Object> entry : userClaims.entrySet()) {
-                claims.put(ClaimMapping.build(TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                                entry.getKey(), TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                                entry.getKey(), null, false),
+                String claimUri = claimDialectUri + entry.getKey();
+                claims.put(ClaimMapping.build(claimUri, claimUri, null, false),
                         entry.getValue().toString());
                 if (log.isDebugEnabled() &&
                         IdentityUtil.isTokenLoggable(IdentityConstants.IdentityTokens.USER_CLAIMS)) {
-                    log.debug("Adding claim mapping : " + TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                            entry.getKey() + " <> " + TwitterAuthenticatorConstants.CLAIM_DIALECT_URI + "/" +
-                            entry.getKey() + " : " +
-                            entry.getValue());
+                    log.debug("Adding claim mapping : " + claimUri + " <> " + claimUri + " : " + entry.getValue());
                 }
             }
             if (StringUtils.isBlank(context.getExternalIdP().getIdentityProvider().getClaimConfig().getUserClaimURI())) {
