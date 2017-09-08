@@ -32,5 +32,5 @@ public class TwitterAuthenticatorConstants {
     public static final String TWITTER_OAUTH_VERIFIER = "oauth_verifier";
     public static final String TWITTER_CALLBACK_URL = "https://localhost:9443/commonauth";
     public static final String CLAIM_ID = "id";
-    public static final String CLAIM_DIALECT_URI_PARAMETER = "TwitterClaimDialectUri";
+    public static final String CLAIM_DIALECT_URI_PARAMETER = "ClaimDialectUri";
 }
