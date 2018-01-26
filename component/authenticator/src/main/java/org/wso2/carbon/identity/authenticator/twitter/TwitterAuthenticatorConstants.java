@@ -33,4 +33,7 @@ public class TwitterAuthenticatorConstants {
     public static final String TWITTER_CALLBACK_URL = "https://localhost:9443/commonauth";
     public static final String CLAIM_ID = "id";
     public static final String CLAIM_DIALECT_URI_PARAMETER = "ClaimDialectUri";
+    public static final String TWITTER_LOGIN_TYPE = "twitter";
+    public static final String LOGIN_TYPE_PARAM = "loginType";
+    public static final String STATE_PARAM = "state";
 }
