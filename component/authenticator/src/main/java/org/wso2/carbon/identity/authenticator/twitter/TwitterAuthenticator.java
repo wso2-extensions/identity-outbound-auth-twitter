@@ -31,6 +31,7 @@ import org.wso2.carbon.identity.application.authentication.framework.config.mode
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.ApplicationAuthenticatorException;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
+import org.wso2.carbon.identity.application.authentication.framework.exception.InvalidCredentialsException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
@@ -71,12 +72,48 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         return request.getParameter(TwitterAuthenticatorConstants.STATE_PARAM);
     }
 
+    @Override
     public boolean canHandle(HttpServletRequest request) {
 
+        return ((isOauthParamExists(request) && TwitterAuthenticatorConstants.TWITTER_LOGIN_TYPE.equals
+                (request.getParameter(TwitterAuthenticatorConstants.LOGIN_TYPE_PARAM))) || isErrorParamExists(request));
+    }
+
+    /**
+     * Check access denied error param exist in request.
+     *
+     * @param request httpServletRequest
+     * @return true or false
+     */
+    private boolean isErrorParamExists(HttpServletRequest request) {
+        return request.getParameter(TwitterAuthenticatorConstants.OAUTH2_PARAM_ERROR) != null;
+    }
+
+    /**
+     * Check whether oauth_token and oauth_verifier param exist in request.
+     *
+     * @param request httpServletRequest
+     * @return true or false
+     */
+    private boolean isOauthParamExists(HttpServletRequest request) {
         return (request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_TOKEN) != null
-                && request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER) != null)
-                && TwitterAuthenticatorConstants.TWITTER_LOGIN_TYPE.equals(request.getParameter
-                (TwitterAuthenticatorConstants.LOGIN_TYPE_PARAM));
+                && request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER) != null);
+    }
+
+    /**
+     * Handle error response when click on cancel without providing credentials.
+     *
+     * @param request httpServletRequest
+     * @throws InvalidCredentialsException
+     */
+    private void handleErrorResponse(HttpServletRequest request) throws InvalidCredentialsException {
+        if (isErrorParamExists(request)) {
+            String error = request.getParameter(TwitterAuthenticatorConstants.OAUTH2_PARAM_ERROR);
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to authenticate via Twitter. " + error);
+            }
+            throw new InvalidCredentialsException(error);
+        }
     }
 
     /**
@@ -170,6 +207,7 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
     @Override
     protected void processAuthenticationResponse(HttpServletRequest request, HttpServletResponse response,
                                                  AuthenticationContext context) throws AuthenticationFailedException {
+        handleErrorResponse(request);
         Twitter twitter = (Twitter) context.getProperty(TwitterAuthenticatorConstants.AUTHENTICATOR_NAME.toLowerCase());
         RequestToken requestToken = (RequestToken) context.getProperties().get(TwitterAuthenticatorConstants.TWITTER_REQUEST_TOKEN);
         String verifier = request.getParameter(TwitterAuthenticatorConstants.TWITTER_OAUTH_VERIFIER);
