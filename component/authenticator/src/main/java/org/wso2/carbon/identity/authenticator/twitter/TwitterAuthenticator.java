@@ -74,7 +74,6 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
 
     @Override
     public boolean canHandle(HttpServletRequest request) {
-
         return ((isOauthParamExists(request) && TwitterAuthenticatorConstants.TWITTER_LOGIN_TYPE.equals
                 (request.getParameter(TwitterAuthenticatorConstants.LOGIN_TYPE_PARAM))) || isErrorParamExists(request));
     }
@@ -110,7 +109,8 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         if (isErrorParamExists(request)) {
             String error = request.getParameter(TwitterAuthenticatorConstants.OAUTH2_PARAM_ERROR);
             if (log.isDebugEnabled()) {
-                log.debug("Failed to authenticate via Twitter. " + error);
+                log.debug("Failed to authenticate via Twitter when click on cancel without providing credentials" +
+                        error);
             }
             throw new InvalidCredentialsException(error);
         }
