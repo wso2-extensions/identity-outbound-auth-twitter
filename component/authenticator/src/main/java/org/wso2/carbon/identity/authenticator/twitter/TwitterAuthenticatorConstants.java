@@ -35,6 +35,6 @@ public class TwitterAuthenticatorConstants {
     public static final String CLAIM_DIALECT_URI_PARAMETER = "ClaimDialectUri";
     public static final String TWITTER_LOGIN_TYPE = "twitter";
     public static final String LOGIN_TYPE_PARAM = "loginType";
-    public static final String STATE_PARAM = "state";
+    public static final String STATE_PARAM = "localState";
     public static final String OAUTH2_PARAM_ERROR = "denied";
 }
