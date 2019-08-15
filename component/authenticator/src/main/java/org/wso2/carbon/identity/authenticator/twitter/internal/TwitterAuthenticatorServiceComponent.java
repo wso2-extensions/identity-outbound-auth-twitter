@@ -32,7 +32,7 @@ import java.util.Hashtable;
  */
 public class TwitterAuthenticatorServiceComponent {
 
-    private static Log log = LogFactory.getLog(TwitterAuthenticatorServiceComponent.class);
+    private static final Log log = LogFactory.getLog(TwitterAuthenticatorServiceComponent.class);
 
     protected void activate(ComponentContext ctxt) {
         try {
