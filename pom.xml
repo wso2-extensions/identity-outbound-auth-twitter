@@ -25,7 +25,7 @@
     </parent>
     <groupId>org.wso2.carbon.extension.identity.authenticator.outbound.twitter</groupId>
     <artifactId>identity-outbound-auth-twitter</artifactId>
-    <version>1.0.12</version>
+    <version>1.0.13-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon Extension - Twitter Pom</name>
     <url>http://wso2.org</url>
@@ -187,7 +187,7 @@
         <developerConnection>
             scm:git:https://github.com/wso2-extensions/identity-outbound-auth-twitter
         </developerConnection>
-        <tag>v1.0.12</tag>
+        <tag>HEAD</tag>
     </scm>
     <build>
         <extensions>
