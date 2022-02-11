@@ -31,6 +31,7 @@
             <groupId>org.twitter4j</groupId>
             <artifactId>twitter4j-core</artifactId>
             <version>${twitter4j.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <repositories>
@@ -47,16 +48,6 @@
         </repository>
     </repositories>
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.3.5</version>
-                    <extensions>true</extensions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -86,14 +77,25 @@
                             org.wso2.carbon.identity.application.authentication.framework.*,
                             javax.servlet,
                             javax.servlet.http,
-                            *;resolution:=optional
+                            javax.crypto,
+                            javax.crypto.spec,
+                            javax.management,
+                            javax.management.openmbean,
+                            org.apache.commons.lang,
+                            org.apache.http.client.utils,
+                            org.apache.oltu.oauth2.common.utils,
+                            org.osgi.service.component,
+                            org.slf4j,
+                            org.wso2.carbon.identity.application.common.model,
+                            org.wso2.carbon.identity.application.common.util,
+                            org.wso2.carbon.identity.base,
+                            org.wso2.carbon.identity.core.util
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.authenticator.twitter.internal,
                             org.wso2.carbon.identity.authenticator.*,
                             twitter4j.*
                         </Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
