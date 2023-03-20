@@ -83,7 +83,16 @@
                             org.wso2.carbon.ui.*,
                             org.apache.commons.logging.*; version="1.0.4",
                             org.osgi.framework,
-                            org.wso2.carbon.identity.application.authentication.framework.*,
+                            org.wso2.carbon.identity.application.authentication.framework.*;
+                            version="${carbon.identity.framework.package.import.version.range}",
+                            org.wso2.carbon.identity.application.common.model;
+                            version="${carbon.identity.framework.package.import.version.range}",
+                            org.wso2.carbon.identity.application.common.util;
+                            version="${carbon.identity.framework.package.import.version.range}",
+                            org.wso2.carbon.identity.base;
+                            version="${carbon.identity.framework.package.import.version.range}",
+                            org.wso2.carbon.identity.core.util;
+                            version="${carbon.identity.framework.package.import.version.range}",
                             javax.servlet,
                             javax.servlet.http,
                             *;resolution:=optional
@@ -113,6 +122,6 @@
         </plugins>
     </build>
     <properties>
-        <twitter4j.version>[4.0,)</twitter4j.version>
+        <twitter4j.version>[4.0,4.1)</twitter4j.version>
     </properties>
 </project>
