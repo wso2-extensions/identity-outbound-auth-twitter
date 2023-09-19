@@ -40,6 +40,8 @@ import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.core.ServiceURLBuilder;
+import org.wso2.carbon.identity.core.URLBuilderException;
 import twitter4j.JSONException;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -172,7 +174,12 @@ public class TwitterAuthenticator extends AbstractApplicationAuthenticator imple
         if (StringUtils.isNotEmpty(authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL))) {
             return authenticatorProperties.get(IdentityApplicationConstants.OAuth2.CALLBACK_URL);
         }
-        return IdentityUtil.getServerURL(FrameworkConstants.COMMONAUTH, true, true);
+        try {
+            return ServiceURLBuilder.create().addPath(FrameworkConstants.COMMONAUTH).build()
+                    .getAbsolutePublicURL();
+        } catch (URLBuilderException e) {
+            throw new RuntimeException("Error occurred while building URL.", e);
+        }
     }
 
     @Override
