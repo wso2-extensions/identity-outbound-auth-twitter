@@ -73,6 +73,11 @@
             <version>${carbon.identity.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.core</artifactId>
+            <version>${carbon.identity.framework.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
             <version>${carbon.identity.version}</version>
@@ -228,8 +233,8 @@
                 <version>2.3.1</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -318,6 +323,7 @@
     </distributionManagement>
     <properties>
         <carbon.identity.version>5.0.7</carbon.identity.version>
+        <carbon.identity.framework.version>5.25.260</carbon.identity.framework.version>
         <carbon.identity.framework.package.import.version.range>[5.0.0, 7.0.0)</carbon.identity.framework.package.import.version.range>
         <commons-logging.version>4.4.3</commons-logging.version>
         <carbon.kernel.version>4.4.3</carbon.kernel.version>
