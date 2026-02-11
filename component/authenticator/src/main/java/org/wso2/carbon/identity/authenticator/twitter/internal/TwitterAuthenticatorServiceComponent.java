@@ -22,18 +22,22 @@ package org.wso2.carbon.identity.authenticator.twitter.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
 import org.wso2.carbon.identity.authenticator.twitter.TwitterAuthenticator;
 
 import java.util.Hashtable;
 
-/**
- * @scr.component name="identity.application.authenticator.Twitter.component" immediate="true"
- */
+@Component(
+        name = "identity.application.authenticator.Twitter.component",
+        immediate = true
+)
 public class TwitterAuthenticatorServiceComponent {
 
     private static final Log log = LogFactory.getLog(TwitterAuthenticatorServiceComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctxt) {
         try {
             TwitterAuthenticator authenticator = new TwitterAuthenticator();
